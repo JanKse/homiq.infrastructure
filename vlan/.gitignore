@@ -1,0 +1,26 @@
+# Secrets
+.env
+
+# Certs (private keys)
+certs/ca.key
+certs/home.key
+
+# Runtime data
+homeassistant/config/.storage/
+nodered/data/
+grafana/data/
+influxdb/data/
+mosquitto/data/
+mosquitto/log/
+uptime-kuma/data/
+wireguard/config/
+adguard/work/
+portainer/data/
+esphome/config/.esphome/
+
+# Backups
+backups/
+
+# Misc
+dns_records.txt
+*.log
