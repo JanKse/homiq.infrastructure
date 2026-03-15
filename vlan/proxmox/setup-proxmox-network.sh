@@ -45,9 +45,41 @@ if ! command -v pvesh &> /dev/null; then
 fi
 
 # === DETECT PHYSICAL INTERFACE ===
-PHYS_IF=$(ip -o link show | awk -F': ' '/state UP/ && !/lo|vmbr|docker|br-|veth/ {print $2; exit}')
-if [ -z "$PHYS_IF" ]; then
-    err "Nepodarilo sa nájsť fyzické rozhranie. Nastav PHYS_IF manuálne."
+# Poradie: 1) z .env / prostredia, 2) UP interfaces, 3) všetky fyzické, 4) interaktívny výber
+if [ -z "${PHYS_IF:-}" ]; then
+    # Skús state UP
+    PHYS_IF=$(ip -o link show | awk -F': ' '
+        {
+            iface=$2
+            if (iface ~ /^(lo|vmbr|docker|br-|veth|bond)/) next
+            if ($0 ~ /state UP/) { print iface; exit }
+        }')
+fi
+if [ -z "${PHYS_IF:-}" ]; then
+    # Skús aj state UNKNOWN (interface v bridge môže mať UNKNOWN)
+    PHYS_IF=$(ip -o link show | awk -F': ' '
+        {
+            iface=$2
+            if (iface ~ /^(lo|vmbr|docker|br-|veth|bond)/) next
+            if ($0 ~ /state (UP|UNKNOWN)/) { print iface; exit }
+        }')
+fi
+if [ -z "${PHYS_IF:-}" ]; then
+    # Zobraziť dostupné a opýtať sa
+    echo ""
+    warn "Nepodarilo sa automaticky nájsť fyzické rozhranie."
+    echo ""
+    echo "  Dostupné sieťové rozhrania:"
+    ip -o link show | awk -F': ' '!/lo/ {printf "    %s\n", $2}'
+    echo ""
+    read -rp "  Zadaj názov fyzického rozhrania (napr. eno1, enp2s0, eth0): " PHYS_IF
+    echo ""
+    if [ -z "$PHYS_IF" ]; then
+        err "Žiadne rozhranie nezadané. Ukončujem."
+    fi
+    if ! ip link show "$PHYS_IF" &> /dev/null; then
+        err "Rozhranie '$PHYS_IF' neexistuje."
+    fi
 fi
 log "Fyzické rozhranie: $PHYS_IF"
 

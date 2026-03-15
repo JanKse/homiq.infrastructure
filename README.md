@@ -79,6 +79,8 @@ VLAN_VPN_ID=30
 # proxmox management
 PVE_MGMT_IP=192.168.1.10/24
 PVE_MGMT_GW=192.168.1.1
+# fyzické rozhranie Proxmoxu (ak auto-detekcia zlyhá, napr. eno1, enp2s0, eth0)
+# PHYS_IF=eno1
 
 # zigbee USB (nechaj prázdne ak nie je zapojený)
 ZIGBEE_USB=/dev/ttyUSB0
