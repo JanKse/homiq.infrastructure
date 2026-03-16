@@ -116,7 +116,7 @@ services:
 
   # === ADGUARD HOME (DNS) ===
   adguard:
-    image: adguardteam/adguardhome:latest
+    image: adguard/adguardhome:latest
     container_name: adguard
     restart: always
     ports:
