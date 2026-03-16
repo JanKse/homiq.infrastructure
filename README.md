@@ -50,12 +50,14 @@ bash vlan/proxmox/setup-proxmox-network.sh
 ```
 
 Skript:
-- vytvorí `vmbr1` — VLAN-aware bridge
-- pridá sub-interfaces `vmbr1.10`, `vmbr1.20`, `vmbr1.30`
+- použije existujúci `vmbr0` ako VLAN-aware bridge (single-NIC model)
+- pridá sub-interfaces `vmbr0.10`, `vmbr0.20`, `vmbr0.30`
+- **NEVYTVÁRA vmbr1** (zabráni konfliktu dvoch bridgov na jednom porte)
 - zapne IP forwarding
 - nastaví `iptables` firewall pravidlá (IoT izolovaný od internetu a LAN)
 
-> Sieťové rozhranie sa aplikuje po reštarte alebo `ifreload -a`.
+> `vmbr0` musí mať v `/etc/network/interfaces` nastavené `bridge-vlan-aware yes`.
+> **REBOOT Proxmox** po spustení skriptu (`sudo shutdown -r now`).
 
 ---
 
@@ -76,15 +78,8 @@ VLAN_SERVERS_ID=10
 VLAN_IOT_ID=20
 VLAN_VPN_ID=30
 
-# proxmox management
-PVE_MGMT_IP=192.168.0.10/24
-PVE_MGMT_GW=192.168.0.1
-# fyzické rozhranie Proxmoxu (ak auto-detekcia zlyhá, napr. eno1, enp2s0, eth0)
-# PHYS_IF=eno1
-
-# zigbee USB (nechaj prázdne ak nie je zapojený)
-ZIGBEE_USB=/dev/ttyUSB0
-ZIGBEE_DEVICE=/dev/ttyUSB0
+# domáca LAN (odkiaľ pristupuješ na služby)
+HOME_LAN_CIDR=192.168.0.0/24
 
 # domény
 DOMAIN_SUFFIX=.home
@@ -113,8 +108,8 @@ bash vlan/proxmox/create-lxc.sh
 ```
 
 Skript vytvorí LXC 200 s dvoma sieťovými rozhraniami:
-- `eth0` → VLAN 10 (`10.10.10.100/24`) — hlavná sieť
-- `eth1` → VLAN 20 (`10.10.20.1/24`) — IoT gateway
+- `eth0` → VLAN 10 (`10.10.10.100/24`) cez `vmbr0` — hlavná sieť
+- `eth1` → VLAN 20 (`10.10.20.1/24`) cez `vmbr0` — IoT gateway
 
 Potom skopíruje `bootstrap-lxc.sh` do kontajnera a vypíše ďalší krok.
 

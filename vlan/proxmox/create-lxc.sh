@@ -2,6 +2,7 @@
 # =============================================================
 #  Spúšťa sa NA PROXMOX HOSTE
 #  Vytvorí LXC kontajner s dvoma NIC (VLAN 10 + VLAN 20)
+#  Single-NIC model: obe NIC idú cez vmbr0 s VLAN tagmi
 # =============================================================
 set -euo pipefail
 
@@ -61,8 +62,8 @@ if pct status "$CT_ID" &> /dev/null; then
 fi
 
 # === CHECK VLAN BRIDGE ===
-if ! ip link show vmbr1 &> /dev/null; then
-    err "Bridge vmbr1 neexistuje. Najprv spusti: proxmox/setup-proxmox-network.sh"
+if ! ip link show vmbr0 &> /dev/null; then
+    err "Bridge vmbr0 neexistuje. Najprv nastav management bridge na Proxmoxe."
 fi
 
 # === DOWNLOAD TEMPLATE ===
@@ -81,8 +82,8 @@ pct create "$CT_ID" "$CT_TEMPLATE" \
     --memory "$CT_RAM" \
     --swap "$CT_SWAP" \
     --cores "$CT_CORES" \
-    --net0 "name=eth0,bridge=vmbr1,tag=${VLAN_SERVERS_ID},ip=${CT_IP},gw=${CT_GW}" \
-    --net1 "name=eth1,bridge=vmbr1,tag=${VLAN_IOT_ID},ip=${CT_IOT_IP}" \
+    --net0 "name=eth0,bridge=vmbr0,tag=${VLAN_SERVERS_ID},ip=${CT_IP},gw=${CT_GW}" \
+    --net1 "name=eth1,bridge=vmbr0,tag=${VLAN_IOT_ID},ip=${CT_IOT_IP}" \
     --unprivileged 0 \
     --features "nesting=1,keyctl=1" \
     --onboot 1 \
@@ -123,8 +124,8 @@ log "  LXC $CT_ID pripravený!"
 log "============================================"
 echo ""
 echo "  Sieťové rozhrania:"
-echo "    eth0 (VLAN $VLAN_SERVERS_ID): $CT_IP    — servery"
-echo "    eth1 (VLAN $VLAN_IOT_ID):    $CT_IOT_IP — IoT gateway"
+echo "    eth0 (VLAN $VLAN_SERVERS_ID) cez vmbr0: $CT_IP    — servery"
+echo "    eth1 (VLAN $VLAN_IOT_ID) cez vmbr0:    $CT_IOT_IP — IoT gateway"
 echo ""
 echo "  Ďalší krok:"
 echo "    pct exec $CT_ID -- /root/bootstrap-lxc.sh"
