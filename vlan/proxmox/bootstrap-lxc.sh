@@ -62,7 +62,10 @@ log "Testujem Docker..."
 if docker run --rm hello-world &> /dev/null; then
     log "Docker funguje správne."
 else
-    err "Docker test zlyhal."
+    warn "Docker test zlyhal. Zbieram diagnostiku..."
+    systemctl status docker --no-pager -l || true
+    journalctl -u docker -n 80 --no-pager || true
+    err "Docker test zlyhal. Ak je kontajner unprivileged, treba ho vytvoriť nanovo cez proxmox/create-lxc.sh (privileged CT)."
 fi
 
 # === 5. PREPARE DIR ===

@@ -99,6 +99,7 @@ CT_CONF="/etc/pve/lxc/${CT_ID}.conf"
 # /dev/net/tun pre WireGuard
 echo "lxc.cgroup2.devices.allow: c 10:200 rwm" >> "$CT_CONF"
 echo "lxc.mount.entry: /dev/net/tun dev/net/tun none bind,create=file" >> "$CT_CONF"
+echo "lxc.apparmor.profile: unconfined" >> "$CT_CONF"
 
 # === USB PASSTHROUGH ===
 if [ -n "$ZIGBEE_USB" ] && [ -e "$ZIGBEE_USB" ]; then
@@ -129,4 +130,8 @@ echo "    eth1 (VLAN $VLAN_IOT_ID) cez vmbr0:    $CT_IOT_IP — IoT gateway"
 echo ""
 echo "  Ďalší krok:"
 echo "    pct exec $CT_ID -- /root/bootstrap-lxc.sh"
+echo ""
+echo "  Poznámka:"
+echo "    Tento skript vytvára privileged CT (unprivileged: 0)."
+echo "    Ak bootstrap zlyhá na Dockeri a CT je starý/unprivileged, vytvor nový CT_ID."
 echo ""
