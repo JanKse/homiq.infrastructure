@@ -167,6 +167,10 @@ log "Nastavujem práva..."
 chmod 600 certs/ca.key certs/home.key 2>/dev/null || true
 chown -R 1000:1000 nodered/data 2>/dev/null || true
 chown -R 472:472 grafana/data 2>/dev/null || true
+touch mosquitto/config/password_file mosquitto/log/mosquitto.log
+chmod 644 mosquitto/config/password_file 2>/dev/null || true
+chmod 666 mosquitto/log/mosquitto.log 2>/dev/null || true
+chmod 755 mosquitto/config mosquitto/data mosquitto/log 2>/dev/null || true
 
 # === 7b. CHECK USB ===
 if [ "$IN_LXC" = true ]; then
@@ -183,6 +187,7 @@ docker run --rm -v "$(pwd)/mosquitto/config:/mosquitto/config" \
     eclipse-mosquitto:latest \
     mosquitto_passwd -b -c /mosquitto/config/password_file "$MQTT_USER" "$MQTT_PASSWORD" \
     2>/dev/null || warn "MQTT heslo — skús manuálne."
+chmod 644 mosquitto/config/password_file 2>/dev/null || true
 
 # === 9. ADGUARD CONFIG ===
 if [ ! -f adguard/conf/AdGuardHome.yaml ]; then

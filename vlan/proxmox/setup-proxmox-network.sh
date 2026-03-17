@@ -130,10 +130,11 @@ iptables -A FORWARD -j HOMELAB_FW
 iptables -A HOMELAB_FW -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 # --- Domáca sieť (${HOME_LAN_CIDR}) → VLAN 10 (servery) ---
-# Len HTTPS + DNS
+# Len HTTPS + DNS + AdGuard admin
 iptables -A HOMELAB_FW -s ${HOME_LAN_CIDR} -d 10.10.10.100 -p tcp --dport 443 -j ACCEPT
 iptables -A HOMELAB_FW -s ${HOME_LAN_CIDR} -d 10.10.10.100 -p tcp --dport 53 -j ACCEPT
 iptables -A HOMELAB_FW -s ${HOME_LAN_CIDR} -d 10.10.10.100 -p udp --dport 53 -j ACCEPT
+iptables -A HOMELAB_FW -s ${HOME_LAN_CIDR} -d 10.10.10.100 -p tcp --dport 3000 -j ACCEPT
 iptables -A HOMELAB_FW -s ${HOME_LAN_CIDR} -d 10.10.10.0/24 -j DROP
 
 # --- VLAN 20 (IoT) → VLAN 10 (servery) ---
@@ -180,7 +181,7 @@ echo ""
 echo "  Firewall:"
 echo "    IoT → servery: len MQTT (1883)"
 echo "    IoT → internet: BLOKOVANÉ"
-echo "    Domáca → servery: len HTTPS + DNS"
+echo "    Domáca → servery: len HTTPS + DNS + AdGuard admin (3000)"
 echo ""
 warn "REBOOT Proxmox hosta na aktiváciu vmbr0.<VLAN> interfaces!"
 warn "sudo shutdown -r now"
