@@ -130,11 +130,12 @@ iptables -A FORWARD -j HOMELAB_FW
 iptables -A HOMELAB_FW -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 # --- Domáca sieť (${HOME_LAN_CIDR}) → VLAN 10 (servery) ---
-# Len HTTPS + DNS + AdGuard admin
+# HTTPS + DNS + AdGuard admin + MQTT
 iptables -A HOMELAB_FW -s ${HOME_LAN_CIDR} -d 10.10.10.100 -p tcp --dport 443 -j ACCEPT
 iptables -A HOMELAB_FW -s ${HOME_LAN_CIDR} -d 10.10.10.100 -p tcp --dport 53 -j ACCEPT
 iptables -A HOMELAB_FW -s ${HOME_LAN_CIDR} -d 10.10.10.100 -p udp --dport 53 -j ACCEPT
 iptables -A HOMELAB_FW -s ${HOME_LAN_CIDR} -d 10.10.10.100 -p tcp --dport 3000 -j ACCEPT
+iptables -A HOMELAB_FW -s ${HOME_LAN_CIDR} -d 10.10.10.100 -p tcp --dport 1883 -j ACCEPT
 iptables -A HOMELAB_FW -s ${HOME_LAN_CIDR} -d 10.10.10.0/24 -j DROP
 
 # --- VLAN 20 (IoT) → VLAN 10 (servery) ---
